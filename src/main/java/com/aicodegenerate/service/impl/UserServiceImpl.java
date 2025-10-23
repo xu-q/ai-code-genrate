@@ -1,5 +1,6 @@
 package com.aicodegenerate.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import com.aicodegenerate.enums.UserRoleEnum;
@@ -8,10 +9,14 @@ import com.aicodegenerate.exception.ErrorCode;
 import com.aicodegenerate.mapper.UserMapper;
 import com.aicodegenerate.model.entity.User;
 import com.aicodegenerate.model.entity.dto.user.UserRegisterRequest;
+import com.aicodegenerate.model.entity.vo.LoginUserVO;
 import com.aicodegenerate.service.UserService;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
+
+import static com.aicodegenerate.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
  * 用户 服务层实现。
@@ -59,5 +64,58 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     public String getEncryptPassword(String userPassword) {
         return DigestUtil.md5Hex(SALT + userPassword, "UTF-8");
+    }
+
+    @Override
+    public LoginUserVO userLogin(String userAccount, String userPassword, HttpServletRequest request) {
+        if (StrUtil.hasBlank(userAccount, userPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
+        }
+        if (userAccount.length() < 4) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户账号过短");
+        }
+        if (userPassword.length() < 4 || userPassword.length() > 8) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户密码长度为4到8位");
+        }
+        User user = this.mapper.selectOneByQuery(new QueryWrapper().eq("userAccount", userAccount).eq("userPassword", getEncryptPassword(userPassword)));
+        if (user == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
+        }
+        request.getSession().setAttribute(USER_LOGIN_STATE, user);
+        return getLoginUserVO(user);
+    }
+
+    @Override
+    public User getUserLogin(HttpServletRequest request) {
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        User user = (User) userObj;
+        if (user == null || user.getId() == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+        User currentUser = this.mapper.selectOneById(user.getId());
+        if (currentUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+        return currentUser;
+    }
+
+    @Override
+    public boolean userLogout(HttpServletRequest request) {
+        // 先判断用户是否登录
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        if (userObj == null) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "用户未登录");
+        }
+        // 移除登录态
+        request.getSession().removeAttribute(USER_LOGIN_STATE);
+        return true;
+    }
+
+
+    @Override
+    public LoginUserVO getLoginUserVO(User user) {
+        LoginUserVO loginUserVO = new LoginUserVO();
+        BeanUtil.copyProperties(user, loginUserVO);
+        return loginUserVO;
     }
 }
