@@ -1,8 +1,8 @@
 package com.aicodegenerate.service;
 
 import com.aicodegenerate.model.entity.User;
-import com.aicodegenerate.model.entity.dto.user.UserRegisterRequest;
-import com.aicodegenerate.model.entity.vo.LoginUserVO;
+import com.aicodegenerate.model.user.UserRegisterRequest;
+import com.aicodegenerate.model.vo.LoginUserVO;
 import com.mybatisflex.core.service.IService;
 import jakarta.servlet.http.HttpServletRequest;
 

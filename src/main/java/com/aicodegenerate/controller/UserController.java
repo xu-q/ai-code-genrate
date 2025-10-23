@@ -1,16 +1,13 @@
 package com.aicodegenerate.controller;
 
-import com.aicodegenerate.annotation.AuthCheck;
 import com.aicodegenerate.common.BaseResponse;
 import com.aicodegenerate.common.ResultUtils;
-import com.aicodegenerate.constant.UserConstant;
-import com.aicodegenerate.enums.UserRoleEnum;
 import com.aicodegenerate.exception.ErrorCode;
 import com.aicodegenerate.exception.ThrowUtils;
 import com.aicodegenerate.model.entity.User;
-import com.aicodegenerate.model.entity.dto.user.UserLoginRequest;
-import com.aicodegenerate.model.entity.dto.user.UserRegisterRequest;
-import com.aicodegenerate.model.entity.vo.LoginUserVO;
+import com.aicodegenerate.model.user.UserLoginRequest;
+import com.aicodegenerate.model.user.UserRegisterRequest;
+import com.aicodegenerate.model.vo.LoginUserVO;
 import com.aicodegenerate.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;

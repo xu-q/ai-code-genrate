@@ -1,4 +1,4 @@
-package com.aicodegenerate.model.entity.vo;
+package com.aicodegenerate.model.vo;
 
 import lombok.Data;
 

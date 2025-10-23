@@ -1,4 +1,4 @@
-package com.aicodegenerate.model.entity.vo;
+package com.aicodegenerate.model.vo;
 
 import lombok.Data;
 
@@ -6,16 +6,16 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 脱敏后的登录用户信息
+ * 脱敏后的用户信息
  */
 @Data
-public class LoginUserVO implements Serializable {
+public class UserVO implements Serializable {
 
     /**
-     * 用户 id
+     * id
      */
     private Long id;
-
+    
     /**
      * 账号
      */
@@ -45,11 +45,6 @@ public class LoginUserVO implements Serializable {
      * 创建时间
      */
     private LocalDateTime createTime;
-
-    /**
-     * 更新时间
-     */
-    private LocalDateTime updateTime;
 
     private static final long serialVersionUID = 1L;
 }
