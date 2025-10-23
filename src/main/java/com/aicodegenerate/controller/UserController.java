@@ -1,7 +1,10 @@
 package com.aicodegenerate.controller;
 
+import com.aicodegenerate.annotation.AuthCheck;
 import com.aicodegenerate.common.BaseResponse;
 import com.aicodegenerate.common.ResultUtils;
+import com.aicodegenerate.constant.UserConstant;
+import com.aicodegenerate.enums.UserRoleEnum;
 import com.aicodegenerate.exception.ErrorCode;
 import com.aicodegenerate.exception.ThrowUtils;
 import com.aicodegenerate.model.entity.User;
@@ -43,6 +46,7 @@ public class UserController {
         return ResultUtils.success(userService.getLoginUserVO(loginUser));
     }
 
+    //@AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     @PostMapping("/logout")
     public BaseResponse<Boolean> userLogout(HttpServletRequest request) {
         ThrowUtils.throwIf(request == null, ErrorCode.PARAMS_ERROR);
