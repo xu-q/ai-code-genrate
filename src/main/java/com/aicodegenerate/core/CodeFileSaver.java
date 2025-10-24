@@ -4,7 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aicodegenerate.ai.model.HtmlCodeResult;
-import com.aicodegenerate.ai.model.MutilFileCodeResult;
+import com.aicodegenerate.ai.model.MultiFileCodeResult;
 import com.aicodegenerate.model.enums.CodeGenTypeEnum;
 
 import java.io.File;
@@ -29,7 +29,7 @@ public class CodeFileSaver {
     /**
      * 保存多个文件
      */
-    public static File saveMutilFileCodeResult(MutilFileCodeResult mutilFileCodeResult) {
+    public static File saveMutilFileCodeResult(MultiFileCodeResult mutilFileCodeResult) {
         String baseDirPath = buildFilePath(CodeGenTypeEnum.MULTI_FILE.getValue());
         wirteToFile(baseDirPath, "index.html", mutilFileCodeResult.getHtmlCode());
         wirteToFile(baseDirPath, "style.css", mutilFileCodeResult.getCssCode());

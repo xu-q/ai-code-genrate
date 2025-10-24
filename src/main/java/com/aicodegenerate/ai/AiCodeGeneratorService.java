@@ -1,8 +1,9 @@
 package com.aicodegenerate.ai;
 
 import com.aicodegenerate.ai.model.HtmlCodeResult;
-import com.aicodegenerate.ai.model.MutilFileCodeResult;
+import com.aicodegenerate.ai.model.MultiFileCodeResult;
 import dev.langchain4j.service.SystemMessage;
+import reactor.core.publisher.Flux;
 
 public interface AiCodeGeneratorService {
 
@@ -10,5 +11,11 @@ public interface AiCodeGeneratorService {
     HtmlCodeResult generateHtmlCode(String userMessage);
 
     @SystemMessage(fromResource = "prompt/mutil-file-system-prompt.txt")
-    MutilFileCodeResult generateMutilFileCode(String userMessage);
+    MultiFileCodeResult generateMutilFileCode(String userMessage);
+
+    @SystemMessage(fromResource = "prompt/html-system-prompt.txt")
+    Flux<String> generateHtmlCodeStream(String userMessage);
+
+    @SystemMessage(fromResource = "prompt/mutil-file-system-prompt.txt")
+    Flux<String> generateMutilFileCodeStream(String userMessage);
 }
