@@ -1,4 +1,4 @@
-package com.aicodegenerate.model.user;
+package com.aicodegenerate.model.dto.user;
 
 import lombok.Data;
 

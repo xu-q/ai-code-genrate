@@ -3,13 +3,15 @@ package com.aicodegenerate.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
-import com.aicodegenerate.model.enums.UserRoleEnum;
 import com.aicodegenerate.exception.BusinessException;
 import com.aicodegenerate.exception.ErrorCode;
 import com.aicodegenerate.mapper.UserMapper;
+import com.aicodegenerate.model.dto.user.UserQueryRequest;
+import com.aicodegenerate.model.dto.user.UserRegisterRequest;
 import com.aicodegenerate.model.entity.User;
-import com.aicodegenerate.model.user.UserRegisterRequest;
+import com.aicodegenerate.model.enums.UserRoleEnum;
 import com.aicodegenerate.model.vo.LoginUserVO;
+import com.aicodegenerate.model.vo.UserVO;
 import com.aicodegenerate.service.UserService;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
@@ -109,6 +111,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 移除登录态
         request.getSession().removeAttribute(USER_LOGIN_STATE);
         return true;
+    }
+
+    @Override
+    public UserVO getUserVO(User user) {
+        if (user == null) {
+            return null;
+        }
+        UserVO userVO = new UserVO();
+        BeanUtil.copyProperties(user, userVO);
+        return userVO;
     }
 
 
