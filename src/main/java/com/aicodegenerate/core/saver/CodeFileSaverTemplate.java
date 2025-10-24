@@ -1,9 +1,7 @@
 package com.aicodegenerate.core.saver;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import com.aicodegenerate.ai.model.MultiFileCodeResult;
 import com.aicodegenerate.exception.BusinessException;
 import com.aicodegenerate.exception.ErrorCode;
 import com.aicodegenerate.model.enums.CodeGenTypeEnum;
@@ -21,11 +19,11 @@ public abstract class CodeFileSaverTemplate<T> {
      */
     private static final String FILE_SAVE_ROOT_DIR = System.getProperty("user.dir") + "/tmp/code_output/";
 
-    public final File saveCode(T t) {
+    public final File saveCode(T t, Long appId) {
         //1.验证输入
         virifyInput(t);
         //2.构建文件的唯一路径（tmp/code_output/bizType_雪花ID）
-        String baseDirPath = buildFilePath();
+        String baseDirPath = buildFilePath(appId);
         //3.保存文件(由子类去实现)
         saveFiles(t, baseDirPath);
         //4.返回文件
@@ -35,9 +33,13 @@ public abstract class CodeFileSaverTemplate<T> {
     /**
      * 构建文件的唯一路径（tmp/code_output/bizType_雪花ID）
      */
-    private String buildFilePath() {
+    private String buildFilePath(Long appId) {
+        if (appId == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "appId不能为空");
+        }
         String codeType = getCodeType().getValue();
-        String uniqueDirName = StrUtil.format("{}_{}", codeType, IdUtil.getSnowflakeNextIdStr());
+        //String uniqueDirName = StrUtil.format("{}_{}", codeType, IdUtil.getSnowflakeNextIdStr());
+        String uniqueDirName = StrUtil.format("{}_{}", codeType, appId);
         String dirPath = FILE_SAVE_ROOT_DIR + File.separator + uniqueDirName;
         FileUtil.mkdir(dirPath);
         return dirPath;

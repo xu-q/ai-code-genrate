@@ -1,11 +1,9 @@
 package com.aicodegenerate.service;
 
-import com.aicodegenerate.model.dto.user.UserQueryRequest;
 import com.aicodegenerate.model.entity.User;
 import com.aicodegenerate.model.dto.user.UserRegisterRequest;
 import com.aicodegenerate.model.vo.LoginUserVO;
 import com.aicodegenerate.model.vo.UserVO;
-import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.service.IService;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -22,7 +20,7 @@ public interface UserService extends IService<User> {
 
     LoginUserVO userLogin(String userAccount, String userPassword, HttpServletRequest request);
 
-    User getUserLogin(HttpServletRequest request);
+    User getLoginUser(HttpServletRequest request);
 
     LoginUserVO getLoginUserVO(User user);
 

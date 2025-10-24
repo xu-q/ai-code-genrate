@@ -1,6 +1,8 @@
 package com.aicodegenerate.controller;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import com.aicodegenerate.annotation.AuthCheck;
 import com.aicodegenerate.common.BaseResponse;
 import com.aicodegenerate.common.DeleteRequest;
@@ -23,10 +25,15 @@ import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 应用 控制层。
@@ -41,6 +48,34 @@ public class AppController {
     @Resource
     private UserService userService;
 
+    @GetMapping(value = "/chat/gen/code", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent<String>> chatToGenCode(@RequestParam Long appId, @RequestParam String message, HttpServletRequest request) {
+        // 参数校验
+        ThrowUtils.throwIf(appId == null || appId <= 0, ErrorCode.PARAMS_ERROR, "应用 id 错误");
+        ThrowUtils.throwIf(StrUtil.isBlank(message), ErrorCode.PARAMS_ERROR, "提示词不能为空");
+        // 获取当前登录用户
+        User loginUser = userService.getLoginUser(request);
+        // 调用服务生成代码（SSE 流式返回）
+        Flux<String> contentFlux = appService.chatToGenCode(appId, message, loginUser);
+        return contentFlux.map(content -> {
+            //这里map里的key用 d 是为了节省传输空间，因为流式返回每次都会输出少量的数据，会输出很多map
+            Map<String, String> map = Map.of("d", content);
+            String jsonData = JSONUtil.toJsonStr(map);
+            return ServerSentEvent.
+                    <String>builder()
+                    .data(jsonData)
+                    .build();
+
+            //concatWith添加一个额外的事件，告诉前端应用生成完成，防止网路问题中断，前端不知道是否是正常结束生成应用。
+        }).concatWith(
+                Mono.just(ServerSentEvent
+                        .<String>builder()
+                        .event("done")
+                        .data("")
+                        .build())
+        );
+    }
+
     /**
      * 创建应用
      */
@@ -48,8 +83,8 @@ public class AppController {
     public BaseResponse<Long> addApp(@RequestBody AppAddRequest appAddRequest, HttpServletRequest request) {
         ThrowUtils.throwIf(appAddRequest == null, ErrorCode.PARAMS_ERROR);
         // 获取当前登录用户
-        User loginUser = userService.getUserLogin(request);
-        Long appId = appService.createApp(appAddRequest, loginUser);
+        User loginUser = userService.getLoginUser(request);
+        Long appId = appService.createApp(appAddRequest, request);
         return ResultUtils.success(appId);
     }
 
@@ -61,7 +96,7 @@ public class AppController {
         if (appUpdateRequest == null || appUpdateRequest.getId() == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User loginUser = userService.getUserLogin(request);
+        User loginUser = userService.getLoginUser(request);
         long id = appUpdateRequest.getId();
         // 判断是否存在
         App oldApp = appService.getById(id);
@@ -89,7 +124,7 @@ public class AppController {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User loginUser = userService.getUserLogin(request);
+        User loginUser = userService.getLoginUser(request);
         long id = deleteRequest.getId();
         // 判断是否存在
         App oldApp = appService.getById(id);
@@ -121,7 +156,7 @@ public class AppController {
     @PostMapping("/my/list/page/vo")
     public BaseResponse<Page<AppVO>> listMyAppVOByPage(@RequestBody AppQueryRequest appQueryRequest, HttpServletRequest request) {
         ThrowUtils.throwIf(appQueryRequest == null, ErrorCode.PARAMS_ERROR);
-        User loginUser = userService.getUserLogin(request);
+        User loginUser = userService.getLoginUser(request);
         // 限制每页最多 20 个
         long pageSize = appQueryRequest.getPageSize();
         ThrowUtils.throwIf(pageSize > 20, ErrorCode.PARAMS_ERROR, "每页最多查询 20 个应用");

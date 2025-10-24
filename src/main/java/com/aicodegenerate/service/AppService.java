@@ -1,13 +1,15 @@
 package com.aicodegenerate.service;
 
+import com.aicodegenerate.common.BaseResponse;
 import com.aicodegenerate.model.dto.app.AppAddRequest;
 import com.aicodegenerate.model.dto.app.AppQueryRequest;
-import com.aicodegenerate.model.dto.user.UserQueryRequest;
 import com.aicodegenerate.model.entity.App;
 import com.aicodegenerate.model.entity.User;
 import com.aicodegenerate.model.vo.AppVO;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.service.IService;
+import jakarta.servlet.http.HttpServletRequest;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 
@@ -19,7 +21,7 @@ public interface AppService extends IService<App> {
     /**
      * 创建应用
      */
-    Long createApp(AppAddRequest appAddRequest, User loginUser);
+    Long createApp(AppAddRequest appAddRequest, HttpServletRequest request);
 
     /**
      * 获取应用封装类
@@ -39,5 +41,9 @@ public interface AppService extends IService<App> {
      */
     List<AppVO> getAppVOList(List<App> appList);
 
+    /**
+     * 通过对话生成应用代码
+     */
+    Flux<String> chatToGenCode(Long appId, String message, User loginUser);
 
 }

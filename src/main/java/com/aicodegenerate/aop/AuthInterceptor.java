@@ -25,7 +25,7 @@ public class AuthInterceptor {
     public Object doInterceptor(ProceedingJoinPoint joinPoint, AuthCheck authCheck) throws Throwable {
         String mustRole = authCheck.mustRole();
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-        User loginUser = userService.getUserLogin(requestAttributes.getRequest());
+        User loginUser = userService.getLoginUser(requestAttributes.getRequest());
         UserRoleEnum mustRoleEnum = UserRoleEnum.getEnumByValue(mustRole);
         //为空表示不需要权限
         if (mustRoleEnum == null) {
