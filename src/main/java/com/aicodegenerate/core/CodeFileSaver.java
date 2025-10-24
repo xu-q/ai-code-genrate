@@ -10,6 +10,7 @@ import com.aicodegenerate.model.enums.CodeGenTypeEnum;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 
+@Deprecated
 public class CodeFileSaver {
 
     /**

@@ -3,11 +3,13 @@ package com.aicodegenerate.core.saver;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import com.aicodegenerate.ai.model.MultiFileCodeResult;
 import com.aicodegenerate.exception.BusinessException;
 import com.aicodegenerate.exception.ErrorCode;
 import com.aicodegenerate.model.enums.CodeGenTypeEnum;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 
 /**
  * 代码文件保存器模板
@@ -58,5 +60,15 @@ public abstract class CodeFileSaverTemplate<T> {
     /**
      * 获取代码生成类型
      */
-    public abstract CodeGenTypeEnum getCodeType();
+    protected abstract CodeGenTypeEnum getCodeType();
+
+    /**
+     * 保存单个文件
+     */
+    public final void wirteToFile(String dirPath, String filename, String content) {
+        if (StrUtil.isNotBlank(content)) {
+            String filePath = dirPath + File.separator + filename;
+            FileUtil.writeString(content, filePath, StandardCharsets.UTF_8);
+        }
+    }
 }
