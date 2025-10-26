@@ -1,8 +1,6 @@
 spring:
   application:
     name: ai-code-generate
-  profiles:
-    active: local
   # mysql
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -28,3 +26,21 @@ knife4j:
   enable: true
   setting:
     language: zh_cn
+
+# AI
+langchain4j:
+  open-ai:
+    chat-model:
+      base-url: https://api.deepseek.com
+      api-key: sk-aa3aee7f4ccd4a4fb985e4ee08d26527
+      model-name: deepseek-chat
+      log-requests: true
+      log-responses: true
+
+    streaming-chat-model:
+      base-url: https://api.deepseek.com
+      api-key: sk-aa3aee7f4ccd4a4fb985e4ee08d26527
+      model-name: deepseek-chat
+      max-tokens: 8192
+      log-requests: true
+      log-responses: true
