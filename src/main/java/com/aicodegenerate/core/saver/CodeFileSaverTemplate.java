@@ -2,6 +2,7 @@ package com.aicodegenerate.core.saver;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import com.aicodegenerate.constant.AppConstant;
 import com.aicodegenerate.exception.BusinessException;
 import com.aicodegenerate.exception.ErrorCode;
 import com.aicodegenerate.model.enums.CodeGenTypeEnum;
@@ -13,11 +14,6 @@ import java.nio.charset.StandardCharsets;
  * 代码文件保存器模板
  */
 public abstract class CodeFileSaverTemplate<T> {
-
-    /**
-     * 文件保存根目录
-     */
-    private static final String FILE_SAVE_ROOT_DIR = System.getProperty("user.dir") + "/tmp/code_output/";
 
     public final File saveCode(T t, Long appId) {
         //1.验证输入
@@ -40,7 +36,7 @@ public abstract class CodeFileSaverTemplate<T> {
         String codeType = getCodeType().getValue();
         //String uniqueDirName = StrUtil.format("{}_{}", codeType, IdUtil.getSnowflakeNextIdStr());
         String uniqueDirName = StrUtil.format("{}_{}", codeType, appId);
-        String dirPath = FILE_SAVE_ROOT_DIR + File.separator + uniqueDirName;
+        String dirPath = AppConstant.CODE_OUTPUT_ROOT_DIR + File.separator + uniqueDirName;
         FileUtil.mkdir(dirPath);
         return dirPath;
     }

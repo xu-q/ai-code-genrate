@@ -12,10 +12,7 @@ import com.aicodegenerate.constant.UserConstant;
 import com.aicodegenerate.exception.BusinessException;
 import com.aicodegenerate.exception.ErrorCode;
 import com.aicodegenerate.exception.ThrowUtils;
-import com.aicodegenerate.model.dto.app.AppAddRequest;
-import com.aicodegenerate.model.dto.app.AppAdminUpdateRequest;
-import com.aicodegenerate.model.dto.app.AppQueryRequest;
-import com.aicodegenerate.model.dto.app.AppUpdateRequest;
+import com.aicodegenerate.model.dto.app.*;
 import com.aicodegenerate.model.entity.App;
 import com.aicodegenerate.model.entity.User;
 import com.aicodegenerate.model.vo.AppVO;
@@ -115,6 +112,21 @@ public class AppController {
         return ResultUtils.success(true);
     }
 
+    @PostMapping("/deploy")
+    public BaseResponse<String> deployApp(@RequestBody AppDeployRequest appDeployRequest, HttpServletRequest request) {
+        // 检查部署请求是否为空
+        ThrowUtils.throwIf(appDeployRequest == null, ErrorCode.PARAMS_ERROR);
+        // 获取应用 ID
+        Long appId = appDeployRequest.getAppId();
+        // 检查应用 ID 是否为空
+        ThrowUtils.throwIf(appId == null || appId <= 0, ErrorCode.PARAMS_ERROR, "应用 ID 不能为空");
+        // 获取当前登录用户
+        User loginUser = userService.getLoginUser(request);
+        // 调用服务部署应用
+        String deployUrl = appService.deployApp(appId, loginUser);
+        // 返回部署 URL
+        return ResultUtils.success(deployUrl);
+    }
 
     /**
      * 删除应用（用户只能删除自己的应用）
