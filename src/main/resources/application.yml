@@ -12,16 +12,14 @@ server:
   servlet:
     context-path: /api
 
-
-
-# springdoc-openapi????
+# springdoc-openapi
 springdoc:
   group-configs:
     - group: 'default'
       paths-to-match: '/**'
       packages-to-scan: com.aicodegenerate.controller
 
-# knife4j???????????????
+# knife4j
 knife4j:
   enable: true
   setting:
