@@ -1,5 +1,6 @@
 package com.aicodegenerate.ai;
 
+import com.aicodegenerate.service.impl.ChatHistoryServiceImpl;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import dev.langchain4j.community.store.memory.chat.redis.RedisChatMemoryStore;
@@ -27,6 +28,9 @@ public class AiCodeGeneratorServiceFactory {
     @Resource
     private RedisChatMemoryStore redisChatMemoryStore;
 
+    @Resource
+    private ChatHistoryServiceImpl chatHistoryService;
+
     /**
      * 根据appId创建AiCodeGeneratorService
      */
@@ -39,6 +43,8 @@ public class AiCodeGeneratorServiceFactory {
                 .chatMemoryStore(redisChatMemoryStore)
                 .maxMessages(20)
                 .build();
+        //从数据库中加载对话历史到ai记忆中
+        chatHistoryService.loadChatHistoryToMemory(appId, chatMemory, 20);
         return AiServices.builder(AiCodeGeneratorService.class)
                 .chatModel(chatModel)
                 .streamingChatModel(streamingChatModel)

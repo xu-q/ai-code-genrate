@@ -92,6 +92,8 @@ public class ChatHistoryServiceImpl extends ServiceImpl<ChatHistoryMapper, ChatH
             QueryWrapper queryWrapper = QueryWrapper.create()
                     .eq(ChatHistory::getAppId, appId)
                     .orderBy(ChatHistory::getCreateTime, false)
+                    //这里的limit参数偏移量为1，是因为我们的业务流程中，先保存的用户的这条消息到数据库中的，然后再调用AI，创建AI服务时会加载数据库历史对话（就是此方法loadChatHistoryToMemory）到AI记忆中，
+                    // 此方法是用户向AI发起对话时加载历史对话，此时AI已经有了用户的最新的这条对话，所以这里limit为1就排除最新的一条记录
                     .limit(1, maxCount);
             List<ChatHistory> historyList = this.list(queryWrapper);
             if (CollUtil.isEmpty(historyList)) {

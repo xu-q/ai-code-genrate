@@ -50,7 +50,7 @@ public class AiCodeGeneratorFacade {
         if (codeGenTypeEnum == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "生成类型不能为空");
         }
-        //根据appId获取响应的AI服务实例（支持缓存）
+        //根据appId获取相应的AI服务实例（支持缓存）
         AiCodeGeneratorService aiCodeGeneratorService = aiCodeGeneratorServiceFactory.getAiCodeGeneratorService(appId);
         return switch (codeGenTypeEnum) {
             case HTML -> {
