@@ -1,6 +1,10 @@
 spring:
   application:
     name: ai-code-generate
+
+  session:
+    store-type: redis
+    timeout: 1800 #30分钟过期
   # mysql
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -19,6 +23,9 @@ server:
   port: 8123
   servlet:
     context-path: /api
+    session:
+      cookie:
+        max-age: 1800 #30分钟过期
 
 # springdoc-openapi
 springdoc:

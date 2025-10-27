@@ -109,7 +109,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "用户未登录");
         }
         // 移除登录态
-        request.getSession().removeAttribute(USER_LOGIN_STATE);
+        //request.getSession().removeAttribute(USER_LOGIN_STATE);
+        // 完全清除会话（这将从 Redis 中删除整个 session）
+        request.getSession().invalidate();
         return true;
     }
 
