@@ -1,6 +1,7 @@
 package com.aicodegenerate.core;
 
 import com.aicodegenerate.ai.AiCodeGeneratorService;
+import com.aicodegenerate.ai.AiCodeGeneratorServiceFactory;
 import com.aicodegenerate.ai.model.HtmlCodeResult;
 import com.aicodegenerate.ai.model.MultiFileCodeResult;
 import com.aicodegenerate.core.parser.CodeParserExecutor;
@@ -23,12 +24,14 @@ import java.io.File;
 public class AiCodeGeneratorFacade {
 
     @Resource
-    private AiCodeGeneratorService aiCodeGeneratorService;
+    private AiCodeGeneratorServiceFactory aiCodeGeneratorServiceFactory;
 
     public File generateCodeAndSave(String userMessage, CodeGenTypeEnum codeGenTypeEnum, Long appId) {
         if (codeGenTypeEnum == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "生成类型不能为空");
         }
+        //根据appId获取响应的AI服务实例（支持缓存）
+        AiCodeGeneratorService aiCodeGeneratorService = aiCodeGeneratorServiceFactory.getAiCodeGeneratorService(appId);
         return switch (codeGenTypeEnum) {
             case HTML -> {
                 HtmlCodeResult htmlCodeResult = aiCodeGeneratorService.generateHtmlCode(userMessage);
@@ -47,6 +50,8 @@ public class AiCodeGeneratorFacade {
         if (codeGenTypeEnum == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "生成类型不能为空");
         }
+        //根据appId获取响应的AI服务实例（支持缓存）
+        AiCodeGeneratorService aiCodeGeneratorService = aiCodeGeneratorServiceFactory.getAiCodeGeneratorService(appId);
         return switch (codeGenTypeEnum) {
             case HTML -> {
                 Flux<String> codeStream = aiCodeGeneratorService.generateHtmlCodeStream(userMessage);
