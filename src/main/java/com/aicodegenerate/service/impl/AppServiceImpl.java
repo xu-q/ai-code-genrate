@@ -8,6 +8,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aicodegenerate.constant.AppConstant;
 import com.aicodegenerate.core.AiCodeGeneratorFacade;
+import com.aicodegenerate.core.handler.StreamHandlerExecutor;
 import com.aicodegenerate.exception.BusinessException;
 import com.aicodegenerate.exception.ErrorCode;
 import com.aicodegenerate.exception.ThrowUtils;
@@ -29,7 +30,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import reactor.core.publisher.Flux;
 
@@ -61,6 +61,9 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
     @Resource
     private ChatHistoryServiceImpl chatHistoryService;
 
+    @Resource
+    private StreamHandlerExecutor streamHandlerExecutor;
+
     @Override
     public Flux<String> chatToGenCode(Long appId, String message, User loginUser) {
         // 1. 参数校验
@@ -82,10 +85,11 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         // 5.保存用户消息到对话历史表
         chatHistoryService.addChatMessage(appId, message, ChatHistoryMessageTypeEnum.USER.getValue(), loginUser.getId());
         // 6.调用AI生成代码（流式）
-        Flux<String> contentFlux = aiCodeGeneratorFacade.generateCodeAndSaveStream(message, codeGenTypeEnum, appId);
-        // 7.保存AI响应到对话历史表
-        StringBuilder aiResponesBuilder = new StringBuilder();
-        return contentFlux.map(content -> {  //也可以用doOnNext就不用return，map是对数据做处理需要返回值，只不过这里只是拼接数据用于保存，所以不需要返回处理后的值
+        Flux<String> codeStream = aiCodeGeneratorFacade.generateCodeAndSaveStream(message, codeGenTypeEnum, appId);
+        // 7.处理并保存AI响应到对话历史表
+        return streamHandlerExecutor.doExecute(codeStream, chatHistoryService, appId, loginUser, codeGenTypeEnum);
+        /*StringBuilder aiResponesBuilder = new StringBuilder();
+        return codeStream.map(content -> {  //也可以用doOnNext就不用return，map是对数据做处理需要返回值，只不过这里只是拼接数据用于保存，所以不需要返回处理后的值
             aiResponesBuilder.append(content);
             return content;
         }).doOnComplete(() -> {
@@ -93,7 +97,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
             chatHistoryService.addChatMessage(appId, aiRespones, ChatHistoryMessageTypeEnum.AI.getValue(), loginUser.getId());
         }).doOnError(error -> {//如果AI回复报错，也要保存到对话历史表
             chatHistoryService.addChatMessage(appId, "AI 回复失败： " + error.getMessage(), ChatHistoryMessageTypeEnum.AI.getValue(), loginUser.getId());
-        });
+        });*/
     }
 
     @Override
@@ -147,7 +151,6 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
      * @param request       请求
      * @return 应用 id
      */
-    @PostMapping("/add")
     public Long createApp(@RequestBody AppAddRequest appAddRequest, HttpServletRequest request) {
         ThrowUtils.throwIf(appAddRequest == null, ErrorCode.PARAMS_ERROR);
         // 参数校验
@@ -161,8 +164,8 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         app.setUserId(loginUser.getId());
         // 应用名称暂时为 initPrompt 前 12 位
         app.setAppName(initPrompt.substring(0, Math.min(initPrompt.length(), 12)));
-        // 暂时设置为多文件生成
-        app.setCodeGenType(CodeGenTypeEnum.MULTI_FILE.getValue());
+        // 暂时设置为vue工程生成
+        app.setCodeGenType(CodeGenTypeEnum.VUE_PROJECT.getValue());
         // 插入数据库
         boolean result = this.save(app);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);

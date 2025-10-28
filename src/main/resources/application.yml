@@ -4,7 +4,7 @@ spring:
 
   session:
     store-type: redis
-    timeout: 1800 #30分钟过期
+    timeout: 180000000000 #30分钟过期
   # mysql
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -25,7 +25,7 @@ server:
     context-path: /api
     session:
       cookie:
-        max-age: 1800 #30分钟过期
+        max-age: 180000000000 #30分钟过期
 
 # springdoc-openapi
 springdoc:
