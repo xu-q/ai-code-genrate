@@ -9,6 +9,7 @@ import com.aicodegenerate.common.DeleteRequest;
 import com.aicodegenerate.common.ResultUtils;
 import com.aicodegenerate.constant.AppConstant;
 import com.aicodegenerate.constant.UserConstant;
+import com.aicodegenerate.core.builder.VueProjectBuilder;
 import com.aicodegenerate.exception.BusinessException;
 import com.aicodegenerate.exception.ErrorCode;
 import com.aicodegenerate.exception.ThrowUtils;
@@ -44,6 +45,9 @@ public class AppController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private VueProjectBuilder vueProjectBuilder;
 
     @GetMapping(value = "/chat/gen/code", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<String>> chatToGenCode(@RequestParam Long appId, @RequestParam String message, HttpServletRequest request) {

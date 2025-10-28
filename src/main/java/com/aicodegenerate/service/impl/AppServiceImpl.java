@@ -8,6 +8,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aicodegenerate.constant.AppConstant;
 import com.aicodegenerate.core.AiCodeGeneratorFacade;
+import com.aicodegenerate.core.builder.VueProjectBuilder;
 import com.aicodegenerate.core.handler.StreamHandlerExecutor;
 import com.aicodegenerate.exception.BusinessException;
 import com.aicodegenerate.exception.ErrorCode;
@@ -64,6 +65,9 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
     @Resource
     private StreamHandlerExecutor streamHandlerExecutor;
 
+    @Resource
+    private VueProjectBuilder vueProjectBuilder;
+
     @Override
     public Flux<String> chatToGenCode(Long appId, String message, User loginUser) {
         // 1. 参数校验
@@ -118,21 +122,31 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
             deployKey = RandomUtil.randomString(6);
         }
         //5.获取代码类型和原始的代码生成路径(应用访问路径)
-        String sourceName = app.getCodeGenType() + "_" + appId;
+        String codeGenType = app.getCodeGenType();
+        String sourceName = codeGenType + "_" + appId;
         String sourcePath = AppConstant.CODE_OUTPUT_ROOT_DIR + File.separator + sourceName;
         //6.检查路径是否存在
         File sourceDir = new File(sourcePath);
         if (!sourceDir.exists() || !sourceDir.isDirectory()) {
             new BusinessException(ErrorCode.SYSTEM_ERROR, "应用代码生成路径不存在");
         }
-        //7.复制文件到部署目录
+        //7.vue 项目特殊处理，保险起见再执行构建
+        CodeGenTypeEnum codeGenTypeEnum = CodeGenTypeEnum.getEnumByValue(codeGenType);
+        if (codeGenTypeEnum == CodeGenTypeEnum.VUE_PROJECT) {
+            boolean isBuildSuccess = vueProjectBuilder.buildProject(sourcePath);
+            ThrowUtils.throwIf(!isBuildSuccess, ErrorCode.SYSTEM_ERROR, "Vue 项目构建失败");
+            File distDir = new File(sourcePath, "dist");
+            //构建完成后，将构建后的文件复制到部署目录
+            sourceDir = distDir;
+        }
+        //8.复制文件到部署目录
         String deployDir = AppConstant.CODE_DEPLOY_ROOT_DIR + File.separator + deployKey;
         try {
             FileUtil.copyContent(sourceDir, new File(deployDir), true);
         } catch (IORuntimeException e) {
             new BusinessException(ErrorCode.SYSTEM_ERROR, "应用部署失败: " + e.getMessage());
         }
-        //8.更新数据库
+        //9.更新数据库
         App updateApp = new App();
         updateApp.setId(appId);
         updateApp.setDeployKey(deployKey);

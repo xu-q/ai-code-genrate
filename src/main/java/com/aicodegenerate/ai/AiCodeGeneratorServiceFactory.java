@@ -114,7 +114,7 @@ public class AiCodeGeneratorServiceFactory {
         return aiServiceCache.get(cacheKey, key -> createAiCodeGeneratorService(appId, codeGenType));
     }
 
-   @Bean
+    @Bean
     public AiCodeGeneratorService createAiCodeGeneratorService() {
         return AiServices.builder(AiCodeGeneratorService.class)
                 .chatModel(chatModel)
@@ -123,7 +123,7 @@ public class AiCodeGeneratorServiceFactory {
                         MessageWindowChatMemory.builder()
                                 .id(memoryId)
                                 .chatMemoryStore(redisChatMemoryStore)
-                                .maxMessages(20)
+                                .maxMessages(100) //对话记忆容量，调大防止AI在对话中断片，不知道之前干了什么，循环生成
                                 .build())
                 .build();
     }
