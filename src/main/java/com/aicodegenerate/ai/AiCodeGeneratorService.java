@@ -10,7 +10,7 @@ import reactor.core.publisher.Flux;
 public interface AiCodeGeneratorService {
 
     @SystemMessage(fromResource = "prompt/html-system-prompt.txt")
-    HtmlCodeResult generateHtmlCode(@UserMessage String userMessage);
+    HtmlCodeResult generateHtmlCode(String userMessage);
 
     @SystemMessage(fromResource = "prompt/mutil-file-system-prompt.txt")
     MultiFileCodeResult generateMutilFileCode(String userMessage);
@@ -20,4 +20,7 @@ public interface AiCodeGeneratorService {
 
     @SystemMessage(fromResource = "prompt/mutil-file-system-prompt.txt")
     Flux<String> generateMutilFileCodeStream(String userMessage);
+
+    @SystemMessage(fromResource = "prompt/codegen-vue-project-system-prompt.txt")
+    Flux<String> generateVueProjectCodeStream(@MemoryId long appId, @UserMessage String userMessage);
 }

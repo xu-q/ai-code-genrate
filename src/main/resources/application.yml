@@ -50,10 +50,10 @@ langchain4j:
       log-requests: true
       log-responses: true
 
-    streaming-chat-model:
+    reasoning-streaming-chat-model:
       base-url: https://api.deepseek.com
       api-key: sk-aa3aee7f4ccd4a4fb985e4ee08d26527
-      model-name: deepseek-chat
+      model-name: deepseek-reasoner
       max-tokens: 8192
       log-requests: true
       log-responses: true
