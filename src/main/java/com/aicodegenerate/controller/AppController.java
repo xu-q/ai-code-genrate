@@ -89,7 +89,6 @@ public class AppController {
     public BaseResponse<Long> addApp(@RequestBody AppAddRequest appAddRequest, HttpServletRequest request) {
         ThrowUtils.throwIf(appAddRequest == null, ErrorCode.PARAMS_ERROR);
         // 获取当前登录用户
-        User loginUser = userService.getLoginUser(request);
         Long appId = appService.createApp(appAddRequest, request);
         return ResultUtils.success(appId);
     }
