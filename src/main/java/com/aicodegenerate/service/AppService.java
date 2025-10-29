@@ -1,8 +1,6 @@
 package com.aicodegenerate.service;
 
-import com.aicodegenerate.common.BaseResponse;
 import com.aicodegenerate.model.dto.app.AppAddRequest;
-import com.aicodegenerate.model.dto.app.AppDeployRequest;
 import com.aicodegenerate.model.dto.app.AppQueryRequest;
 import com.aicodegenerate.model.entity.App;
 import com.aicodegenerate.model.entity.User;
@@ -36,9 +34,6 @@ public interface AppService extends IService<App> {
 
     /**
      * 获取应用封装类列表
-     *
-     * @param appList
-     * @return
      */
     List<AppVO> getAppVOList(List<App> appList);
 
@@ -51,5 +46,10 @@ public interface AppService extends IService<App> {
      * 应用部署
      */
     String deployApp(Long appId, User loginUser);
+
+    /**
+     * 异步生成应用截图并更新封面
+     */
+    void generateAppScreenshotAsync(Long appId, String appUrl);
 
 }
