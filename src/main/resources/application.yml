@@ -7,19 +7,18 @@ spring:
   session:
     store-type: redis
     timeout: 1800 #30分钟过期
-  # mysql
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/ai_code_generate
-    username: root
-    password: root
 
-  #reids
-  data:
-    redis:
-      host: 127.0.0.1
-      port: 6379
-      ttl: 3600
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://localhost:3306/ai_code_generate
+#    username: root
+#    password: root
+
+#  data:
+#    redis:
+#      host: 127.0.0.1
+#      port: 6379
+#      ttl: 3600
 
 server:
   port: 8123

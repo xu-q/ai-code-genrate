@@ -40,10 +40,7 @@ public class FileDirReadTool extends BaseTool {
     );
 
     @Tool("读取目录结构，获取指定目录下的所有文件和子目录信息")
-    public String readDir(
-            @P("目录的相对路径，为空则读取整个项目结构")
-            String relativeDirPath,
-            @ToolMemoryId Long appId
+    public String readDir(@P("目录的相对路径，为空则读取整个项目结构") String relativeDirPath, @ToolMemoryId Long appId
     ) {
         try {
             Path path = Paths.get(relativeDirPath == null ? "" : relativeDirPath);
@@ -58,7 +55,7 @@ public class FileDirReadTool extends BaseTool {
             }
             StringBuilder structure = new StringBuilder();
             structure.append("项目目录结构:\n");
-            // 使用 Hutool 递归获取所有文件
+            // 使用 Hutool 递归获取所有文件,并过滤不需要读取的文件
             List<File> allFiles = FileUtil.loopFiles(targetDir, file -> !shouldIgnore(file.getName()));
             // 按路径深度和名称排序显示
             allFiles.stream()
