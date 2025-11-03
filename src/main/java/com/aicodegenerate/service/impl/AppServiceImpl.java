@@ -7,6 +7,7 @@ import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aicodegenerate.ai.AiCodeGenTypeRoutingService;
+import com.aicodegenerate.ai.AiCodeGenTypeRoutingServiceFactory;
 import com.aicodegenerate.constant.AppConstant;
 import com.aicodegenerate.core.AiCodeGeneratorFacade;
 import com.aicodegenerate.core.builder.VueProjectBuilder;
@@ -75,6 +76,9 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
     @Resource
     private AiCodeGenTypeRoutingService aiCodeGenTypeRoutingService;
+
+    @Resource
+    private AiCodeGenTypeRoutingServiceFactory aiCodeGenTypeRoutingServiceFactory;
 
     @Override
     public Flux<String> chatToGenCode(Long appId, String message, User loginUser) {
@@ -205,8 +209,9 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         app.setUserId(loginUser.getId());
         // 应用名称暂时为 initPrompt 前 12 位
         app.setAppName(initPrompt.substring(0, Math.min(initPrompt.length(), 12)));
-        // 根据用户消息AI智能选择生成类型
-        CodeGenTypeEnum codeGenTypeEnum = aiCodeGenTypeRoutingService.routeCodeGenType(initPrompt);
+        // 根据用户消息AI智能选择生成类型(多例模式)
+        AiCodeGenTypeRoutingService aiCodeGenTypeRoutingPrototype = aiCodeGenTypeRoutingServiceFactory.createAiCodeGenTypeRoutingService();
+        CodeGenTypeEnum codeGenTypeEnum = aiCodeGenTypeRoutingPrototype.routeCodeGenType(initPrompt);
         app.setCodeGenType(codeGenTypeEnum.getValue());
         // 插入数据库
         boolean result = this.save(app);

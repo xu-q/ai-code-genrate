@@ -5,6 +5,7 @@ import com.aicodegenerate.exception.BusinessException;
 import com.aicodegenerate.exception.ErrorCode;
 import com.aicodegenerate.model.enums.CodeGenTypeEnum;
 import com.aicodegenerate.service.impl.ChatHistoryServiceImpl;
+import com.aicodegenerate.utils.SpringContextUtil;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import dev.langchain4j.community.store.memory.chat.redis.RedisChatMemoryStore;
@@ -24,7 +25,7 @@ import java.time.Duration;
 @Slf4j
 public class AiCodeGeneratorServiceFactory {
 
-    @Resource
+    @Resource(name = "openAiChatModel")
     private ChatModel chatModel;
 
     /**
@@ -32,12 +33,6 @@ public class AiCodeGeneratorServiceFactory {
      */
     @Resource
     private StreamingChatModel openAiStreamingChatModel;
-
-    /**
-     * 推理模型（流式）
-     */
-    @Resource
-    private StreamingChatModel reasoningStreamingChatModel;
 
     @Resource
     private RedisChatMemoryStore redisChatMemoryStore;
@@ -66,9 +61,12 @@ public class AiCodeGeneratorServiceFactory {
         AiCodeGeneratorService aiCodeGeneratorService = null;
         switch (codeGenType) {
             case VUE_PROJECT -> {
+                //使用多例模式的 StreamingChatModel 解决并发问题
+                StreamingChatModel reasoningStreamingChatModelPrototype = SpringContextUtil.getBean("reasoningStreamingChatModelPrototype", StreamingChatModel.class);
                 aiCodeGeneratorService = AiServices.builder(AiCodeGeneratorService.class)
                         .chatModel(chatModel)
-                        .streamingChatModel(reasoningStreamingChatModel)
+                        //.streamingChatModel(reasoningStreamingChatModel)
+                        .streamingChatModel(reasoningStreamingChatModelPrototype)
                         //框架的问题只有在对话方法上有@MemoryId，就必须这样写
                         .chatMemoryProvider(meoryId -> chatMemory)
                         .tools(toolManager.getAllTools())
@@ -79,9 +77,12 @@ public class AiCodeGeneratorServiceFactory {
                         .build();
             }
             case HTML, MULTI_FILE -> {
+                //使用多例模式的 StreamingChatModel 解决并发问题
+                StreamingChatModel streamingChatModelPrototype = SpringContextUtil.getBean("streamingChatModelPrototype", StreamingChatModel.class);
                 aiCodeGeneratorService = AiServices.builder(AiCodeGeneratorService.class)
                         .chatModel(chatModel)
-                        .streamingChatModel(openAiStreamingChatModel)
+                        //.streamingChatModel(openAiStreamingChatModel)
+                        .streamingChatModel(streamingChatModelPrototype)
                         .chatMemory(chatMemory)
                         .build();
             }
