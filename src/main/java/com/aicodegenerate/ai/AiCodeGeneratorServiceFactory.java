@@ -1,6 +1,6 @@
 package com.aicodegenerate.ai;
 
-import com.aicodegenerate.ai.tools.FileWriteTool;
+import com.aicodegenerate.ai.tools.*;
 import com.aicodegenerate.exception.BusinessException;
 import com.aicodegenerate.exception.ErrorCode;
 import com.aicodegenerate.model.enums.CodeGenTypeEnum;
@@ -45,6 +45,9 @@ public class AiCodeGeneratorServiceFactory {
     @Resource
     private ChatHistoryServiceImpl chatHistoryService;
 
+    @Resource
+    private ToolManager toolManager;
+
     /**
      * 根据appId创建AiCodeGeneratorService
      */
@@ -55,7 +58,7 @@ public class AiCodeGeneratorServiceFactory {
                 .builder()
                 .id(appId)
                 .chatMemoryStore(redisChatMemoryStore)
-                .maxMessages(20)
+                .maxMessages(100)
                 .build();
         //从数据库中加载对话历史到ai记忆中
         chatHistoryService.loadChatHistoryToMemory(appId, chatMemory, 20);
@@ -68,7 +71,7 @@ public class AiCodeGeneratorServiceFactory {
                         .streamingChatModel(reasoningStreamingChatModel)
                         //框架的问题只有在对话方法上有@MemoryId，就必须这样写
                         .chatMemoryProvider(meoryId -> chatMemory)
-                        .tools(new FileWriteTool())
+                        .tools(toolManager.getAllTools())
                         // 处理工具调用幻觉问题
                         .hallucinatedToolNameStrategy(toolExecutionRequest ->
                                 ToolExecutionResultMessage.from(toolExecutionRequest, "Error: there is no tool called " + toolExecutionRequest.name())
