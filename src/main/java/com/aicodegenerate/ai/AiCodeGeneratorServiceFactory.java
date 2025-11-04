@@ -1,5 +1,7 @@
 package com.aicodegenerate.ai;
 
+import com.aicodegenerate.ai.guardrail.PromptSafetyInputGuardrail;
+import com.aicodegenerate.ai.guardrail.RetryOutputGuardrail;
 import com.aicodegenerate.ai.tools.*;
 import com.aicodegenerate.exception.BusinessException;
 import com.aicodegenerate.exception.ErrorCode;
@@ -74,6 +76,9 @@ public class AiCodeGeneratorServiceFactory {
                         .hallucinatedToolNameStrategy(toolExecutionRequest ->
                                 ToolExecutionResultMessage.from(toolExecutionRequest, "Error: there is no tool called " + toolExecutionRequest.name())
                         )
+                        .maxSequentialToolsInvocations(20) //最多连续调用工具方法次数，防止循环生成。
+                        .inputGuardrails(new PromptSafetyInputGuardrail()) // 输入护轨
+                        //.outputGuardrails(new RetryOutputGuardrail()) //输出护轨，可能会导致流式⁢输出的响应不及时，等到输出结束才一起返回，所以如‌果为了追求流式输出效果，建议؜不要通过护轨的方式进行重试。
                         .build();
             }
             case HTML, MULTI_FILE -> {
@@ -84,6 +89,8 @@ public class AiCodeGeneratorServiceFactory {
                         //.streamingChatModel(openAiStreamingChatModel)
                         .streamingChatModel(streamingChatModelPrototype)
                         .chatMemory(chatMemory)
+                        .inputGuardrails(new PromptSafetyInputGuardrail()) // 输入护轨
+                        //.outputGuardrails(new RetryOutputGuardrail()) //输出护轨，可能会导致流式⁢输出的响应不及时，等到输出结束才一起返回，所以如‌果为了追求流式输出效果，建议؜不要通过护轨的方式进行重试。
                         .build();
             }
             default ->
